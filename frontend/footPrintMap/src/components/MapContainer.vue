@@ -83,6 +83,7 @@ const markers = ref([]);
 let map = null; 
 let AMapInstance = null;
 
+
 const showForm = ref(false);
 const formData = ref({
     name: '',
@@ -104,28 +105,35 @@ function handleSaveFootprint(){
     alert('请输入足迹名称');
     return;
   }
-  const newFootprint = addFootprintData({
-    name: formData.value.name,
-    lat: formData.value.lat,
-    lng: formData.value.lng,
-    date: formData.value.date,
-    note: formData.value.note || '',
-    tags: formData.value.tags,
-    photos: formData.value.photos,
-  });
+  
+  try{
+    const newFootprint = addFootprintData({
+      name: formData.value.name,
+      lat: formData.value.lat,
+      lng: formData.value.lng,
+      date: formData.value.date,
+      note: formData.value.note || '',
+      tags: formData.value.tags,
+      photos: formData.value.photos,
+    });
 
-  addMarker(newFootprint);
+    console.log('足迹已保存');
 
-  formData.value = {
-    name: '',
-    lat: 0,
-    lng: 0,
-    date: '',
-    note: '',
-    tags: '',
-    photos: [],
+    addMarker(newFootprint);
+
+    formData.value = {
+      name: '',
+      lat: 0,
+      lng: 0,
+      date: '',
+      note: '',
+      tags: '',
+      photos: [],
+    }
+    showForm.value = false;
+  }catch (error){
+    alert('保存失败' + error.message);
   }
-  showForm.value = false;
 }
 
 function addMarker(footprint) {
@@ -138,21 +146,21 @@ function addMarker(footprint) {
     // 构建弹窗内容（包含照片）
     let photoHtml = '';
     if (footprint.photos && footprint.photos.length > 0) {
-      photoHtml = `<div class="popup-photos">`;
+      photoHtml = `<div style="display:flex;flex-wrap:wrap;gap:4px;margin:6px 0;">`;
       footprint.photos.forEach(photo => {
-        photoHtml += `<img src="${photo}" class="popup-photo" />`;
+        photoHtml += `<img src="${photo}" style="width:70px;height:70px;object-fit:cover;border-radius:6px;" />`;
       });
       photoHtml += `</div>`;
     }
 
     const popupContent = `
-      <div class="custom-popup">
-        <div class="popup-title">${footprint.name}</div>
-        <div class="popup-meta">📅 ${footprint.date}</div>
-        ${footprint.note ? `<div class="popup-note">${footprint.note}</div>` : ''}
+      <div style="max-width:260px;padding:4px 0;">
+        <div style="font-weight:700;font-size:16px;color:#1e293b;">${footprint.name}</div>
+        <div style="font-size:12px;color:#94a3b8;margin:2px 0 4px;">📅 ${footprint.date}</div>
+        ${footprint.note ? `<div style="font-size:13px;color:#475569;margin:4px 0;">${footprint.note}</div>` : ''}
         ${photoHtml}
-        <div class="popup-tags">
-          ${footprint.tags.map(t => `<span class="popup-tag">#${t}</span>`).join('')}
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">
+          ${footprint.tags.map(t => `<span style="background:#eef2f6;padding:2px 10px;border-radius:20px;font-size:11px;color:#64748b;">#${t}</span>`).join('')}
         </div>
       </div>
     `;

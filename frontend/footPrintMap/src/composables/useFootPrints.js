@@ -38,7 +38,7 @@ export function useFootPrints(){
         }
         footprints.value.push(newFootprint);
         saveFootPrints();
-        return newFootPrint;
+        return newFootprint;
     }
 
     function deleteFootPrint(id){
