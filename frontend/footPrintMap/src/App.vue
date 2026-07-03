@@ -1,7 +1,7 @@
-<script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+<script setup>
+import MapContainer from './components/MapContainer.vue';
 </script>
 
 <template>
-  <HelloWorld />
+  <MapContainer />
 </template>
