@@ -1,0 +1,8 @@
+CREATE TABLE travel_image (
+    id VARCHAR(36) PRIMARY KEY COMMENT '图片UUID',
+    travel_id VARCHAR(36) NOT NULL COMMENT '关联游记表travel.id',
+    url VARCHAR(255) NOT NULL COMMENT '图片URL',
+    sort_order INT DEFAULT 0 COMMENT '排序',
+    created_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+    FOREIGN KEY (travel_id) REFERENCES travel(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='游记图片表';

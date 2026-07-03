@@ -1,3 +1,15 @@
 spring:
   application:
     name: footPrintMap
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/footprintmap?createDatabaseIfNotExist=true&serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8
+    username: root
+    password: 'Q5h8VUxT8))MX>AHky:$'
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  flyway:
+    enabled: false  # 关闭 Flyway
+    baseline-on-migrate: true  # 已有表也能平滑接入
+    locations: classpath:db/migration  # SQL 脚本存放路径
+#  mybatis-plus:
+#    configuration:
+#      log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
