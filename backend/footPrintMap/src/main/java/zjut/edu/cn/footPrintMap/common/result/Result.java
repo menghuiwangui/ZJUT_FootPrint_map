@@ -1,4 +1,4 @@
-package zjut.edu.cn.FootPrintMap.common.result;
+package zjut.edu.cn.footPrintMap.common.result;
 
 import lombok.Data;
 
