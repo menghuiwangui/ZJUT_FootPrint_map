@@ -77,12 +77,15 @@ import AMapLoader from '@amap/amap-jsapi-loader';
 
 import { useFootPrints } from '../composables/useFootPrints';
 import { usePhotoUpload } from '../composables/usePhotoUpload';
+import { decodedTextSpanIntersectsWith } from 'typescript';
 
 const mapContainer = ref(null);
 const markers = ref([]); 
+const lightedCities = ref([]);
 let map = null; 
 let AMapInstance = null;
-
+let geocoder = null;
+let districtSearch = null;
 
 const showForm = ref(false);
 const formData = ref({
@@ -98,7 +101,57 @@ const formData = ref({
 const { footprints, addFootPrint: addFootprintData } = useFootPrints();  // 足迹数据管理
 const { fileInput, triggerFileInput, handlePhotoUpload, removePhoto } = usePhotoUpload(formData); // 照片上传逻辑
 
-// 弹出表单控制
+function drawLightedCities(cityName) {
+  console.log('开始点亮城市',cityName);
+
+  if (!cityName || lightedCities.value.includes(cityName)){
+    console.log('城市已点亮或为空',cityName);
+    return;
+  }
+
+  lightedCities.value.push(cityName);
+  localStorage.setItem('lighted_cities', JSON.stringify(lightedCities.value));
+
+  if (!districtSearch){
+    console.log('districtSearch 未初始化');
+    return;
+  }
+
+  districtSearch.search(cityName, (status, result) => {
+    console.log('区划查询 status:', status);
+    console.log('区划查询 result:', result);
+
+    if (status === 'complete' && result.districtList.length > 0) {
+
+      const bounds = result.districtList[0].boundaries;
+      console.log('获取到的边界数量:', bounds ? bounds.length : 0);
+
+      if (bounds && bounds.length > 0) {
+        const polygons = [];
+        bounds.forEach(bound => {
+          const polygon = new AMapInstance.Polygon({
+            path: bound,
+            fillColor: '#FF8C00',    // 暖色填充：橘色
+            fillOpacity: 0.5,        // 半透明填充
+            strokeColor: '#FF4500',  // 边框颜色：橘红
+            strokeWeight: 1,
+            strokeOpacity: 0.8,
+            zIndex: 10,
+          });
+          polygons.push(polygon);
+        });
+        map.add(polygons);
+        console.log('✅ 城市已点亮:', cityName);
+      }
+      else{
+        console.warn('未获取到该城市的边界数据');
+      }
+    }
+    else{
+      console.error('区划查询失败:', status, result);
+    }
+  });
+}
 
 function handleSaveFootprint(){
   if (formData.value.name === ''){
@@ -120,6 +173,29 @@ function handleSaveFootprint(){
     console.log('足迹已保存');
 
     addMarker(newFootprint);
+
+    if (geocoder){
+      const lnglat = [newFootprint.lng, newFootprint.lat];
+      geocoder.getAddress(lnglat, (status, result) => {
+        console.log('逆地理编码 status:', status);
+        console.log('逆地理编码 result:', result);
+
+        if (status === 'complete' && result.regeocode) {
+          const city = result.regeocode.addressComponent.city;
+          const province = result.regeocode.addressComponent.province; 
+          const cityName = (Array.isArray(city) && city.length > 0 ? city[0] : city) || province;
+          console.log('解析到的城市:', cityName);
+          
+          if (cityName) {
+            drawLightedCities(cityName);
+          } else {
+            console.warn('未能解析出城市名');
+          }
+        } else {
+          console.error('逆地理编码失败:', status, result);
+        }
+      });
+    }
 
     formData.value = {
       name: '',
@@ -199,53 +275,67 @@ function addMarker(footprint) {
 // 地图加载 
 onMounted(async () => {
   try {
-    // 1. 设置安全密钥[reference:17]
     window._AMapSecurityConfig = {
-      securityJsCode: import.meta.env.VITE_AMAP_SECURITY_CODE,
+      securityJsCode: 'cdb6037c48ad95339649133690ad6f15',
     };
 
-    // 2. 加载地图 JSAPI[reference:18]
+    // 1. 加载地图，确保 plugins 里包含 Geocoder 和 DistrictSearch
     const AMap = await AMapLoader.load({
-      key: '04889cf2b36a5e208133c70bcc8d33e8', // 读取环境变量
-      version: '2.0', // 指定版本[reference:19]
-      plugins: ['AMap.Scale', 'AMap.ToolBar'], // 需要的插件[reference:20]
+      key: '04889cf2b36a5e208133c70bcc8d33e8', // 换成你自己的 Key
+      version: '2.0',
+      plugins: ['AMap.Scale', 'AMap.ToolBar', 'AMap.Geocoder', 'AMap.DistrictSearch'],
     });
     AMapInstance = AMap;
+    console.log('高德地图 SDK 加载完成');
 
-    // 3. 初始化地图[reference:21]
+    // 2. 初始化地图实例
     map = new AMap.Map(mapContainer.value, {
       viewMode: '3D',
-      zoom: 5, // 初始缩放级别
-      center: [105.602725, 37.076636], // 初始中心点 (中国大致范围)[reference:22]
+      zoom: 5,
+      center: [105.602725, 37.076636],
     });
-    console.log('地图初始化成功!');
+    console.log('地图实例创建完成');
 
-    map.on('click',function(e){
-      console.log('地图点击事件:', e);
-      
-      // 兼容不同的地图版本
+    // 3. 初始化插件 (必须在地图实例创建之后)
+    geocoder = new AMapInstance.Geocoder();
+    districtSearch = new AMapInstance.DistrictSearch({
+      level: 'city',
+      subdistrict: 0,
+      extensions: 'all',
+    });
+    console.log('插件初始化完成');
+
+    // 4. 绑定地图点击事件
+    map.on('click', function(e){
+      console.log('地图被点击了', e);
       const lnglat = e.lnglat || e.lngLat || e.originalEvent?.lngLat;
-
-      if (!lnglat) {
-        console.error('无法获取经纬度', e);
-        return;
-      } 
-
-      const lat = lnglat.lat;
-      const lng = lnglat.lng;
-      formData.value.lng = lng;
-      formData.value.lat = lat;
+      if (!lnglat) return;
+      
+      formData.value.lng = lnglat.lng;
+      formData.value.lat = lnglat.lat;
       formData.value.date = new Date().toISOString().slice(0,10);
-
       showForm.value = true;
     });
+    console.log('点击事件绑定成功');
 
+    // 5. 恢复本地存储里已经点亮过的城市
+    const storedCities = JSON.parse(localStorage.getItem('lighted_cities') || '[]');
+    if (storedCities.length > 0) {
+      lightedCities.value = storedCities;
+      storedCities.forEach(cityName => {
+        drawCityBoundary(cityName);
+      });
+    }
+
+    // 6. 渲染已有的足迹点
     footprints.value.forEach(f => addMarker(f));
 
   } catch (error) {
-    console.error('地图加载失败:', error);
+    // 打印出具体的错误，这样如果哪一步失败了，我们能在控制台看到
+    console.error('❌ 地图初始化过程中发生错误:', error);
   }
 });
+
 
 // 组件销毁时销毁地图
 onUnmounted(() => {

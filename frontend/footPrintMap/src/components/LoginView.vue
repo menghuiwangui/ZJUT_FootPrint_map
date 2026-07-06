@@ -68,7 +68,7 @@ function handleLogin() {
 </script>
 
 <style scoped>
-/* 容器与背景 - 改为温暖的深棕红渐变 */
+
 .login-container {
   position: relative;
   width: 100%;
@@ -81,7 +81,6 @@ function handleLogin() {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-/* 动态光斑装饰 - 改为橘黄色和橘红色 */
 .bg-bubble {
   position: absolute;
   border-radius: 50%;
@@ -92,7 +91,7 @@ function handleLogin() {
 .bubble-1 {
   width: 300px;
   height: 300px;
-  background: #fcf4b9; /* 深橘黄 */
+  background: #fcf4b9; 
   top: -50px;
   left: -50px;
 }
