@@ -10,15 +10,14 @@ import org.springframework.web.bind.annotation.*;
 import zjut.edu.cn.footPrintMap.common.result.Result;
 import zjut.edu.cn.footPrintMap.common.result.ResultStatus;
 import zjut.edu.cn.footPrintMap.common.utils.JWTUtil;
-import zjut.edu.cn.footPrintMap.dto.request.LoginRequest;
-import zjut.edu.cn.footPrintMap.dto.request.RegisterRequest;
-import zjut.edu.cn.footPrintMap.dto.request.UpdatePasswordRequest;
-import zjut.edu.cn.footPrintMap.dto.request.UpdateUserRequest;
-import zjut.edu.cn.footPrintMap.dto.response.LoginResponse;
+import zjut.edu.cn.footPrintMap.dto.request.userRequest.LoginRequest;
+import zjut.edu.cn.footPrintMap.dto.request.userRequest.RegisterRequest;
+import zjut.edu.cn.footPrintMap.dto.request.userRequest.UpdatePasswordRequest;
+import zjut.edu.cn.footPrintMap.dto.request.userRequest.UpdateUserRequest;
+import zjut.edu.cn.footPrintMap.dto.response.userResponse.LoginResponse;
 import zjut.edu.cn.footPrintMap.entity.User;
 import zjut.edu.cn.footPrintMap.mapper.UserDetailsMapper;
 import zjut.edu.cn.footPrintMap.service.UserService;
-import zjut.edu.cn.footPrintMap.service.impl.UserDetailsServiceImpl;
 
 @RestController
 @RequestMapping("/api/user")
@@ -74,8 +73,7 @@ public class UserController {
     @GetMapping("/currentUser")
     public Result<User> getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        User user = userService.lambdaQuery().eq(User::getUsername,username).one();
+        User user = userService.getUserByUsername(authentication.getName());
         if(user == null) {
             return Result.error(ResultStatus.NOT_FOUND,"用户不存在");
         }
@@ -86,8 +84,7 @@ public class UserController {
     @PutMapping("/currentUser")
     public Result<Void> updateUser(@RequestBody UpdateUserRequest updateUserRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        User user = userService.lambdaQuery().eq(User::getUsername,username).one();
+        User user = userService.getUserByUsername(authentication.getName());
         if(user == null) {
             return Result.error(ResultStatus.NOT_FOUND,"用户不存在");
         }
@@ -113,8 +110,7 @@ public class UserController {
     @PutMapping("/password")
     public Result<Void> updatePassword(@RequestBody UpdatePasswordRequest updatePasswordRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        User user = userService.lambdaQuery().eq(User::getUsername,username).one();
+        User user = userService.getUserByUsername(authentication.getName());
         if(user == null) {
             return Result.error(ResultStatus.NOT_FOUND,"用户不存在");
         }
@@ -128,8 +124,7 @@ public class UserController {
     @DeleteMapping("/currentUser")
     public Result<Void> deleteUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        User user = userService.lambdaQuery().eq(User::getUsername,username).one();
+        User user = userService.getUserByUsername(authentication.getName());
         if(user == null) {
             return Result.error(ResultStatus.NOT_FOUND,"用户不存在");
         }

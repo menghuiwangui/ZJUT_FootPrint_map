@@ -1,4 +1,4 @@
-package zjut.edu.cn.footPrintMap.dto.request;
+package zjut.edu.cn.footPrintMap.dto.request.userRequest;
 
 import lombok.Data;
 

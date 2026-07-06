@@ -8,4 +8,9 @@ import zjut.edu.cn.footPrintMap.service.UserService;
 
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+
+    @Override
+    public User getUserByUsername(String username) {
+        return lambdaQuery().eq(User::getUsername,username).one();
+    }
 }
