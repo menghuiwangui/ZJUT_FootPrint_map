@@ -1,12 +1,15 @@
 package zjut.edu.cn.footPrintMap.controller;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import tools.jackson.databind.util.BeanUtil;
 import zjut.edu.cn.footPrintMap.common.result.Result;
 import zjut.edu.cn.footPrintMap.common.result.ResultStatus;
 import zjut.edu.cn.footPrintMap.common.utils.JWTUtil;
@@ -66,8 +69,8 @@ public class UserController {
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setPassword(registerRequest.getPassword());
         user.setNickname(registerRequest.getNickname());
-        userService.save(user);
-        return Result.success(null);
+        boolean saved = userService.save(user);
+        return saved ? Result.success(null) : Result.error(ResultStatus.USE_FAILED);
     }
 
     @GetMapping("/currentUser")
@@ -82,29 +85,15 @@ public class UserController {
     }
 
     @PutMapping("/currentUser")
-    public Result<Void> updateUser(@RequestBody UpdateUserRequest updateUserRequest) {
+    public Result<String> updateUser(@RequestBody UpdateUserRequest updateUserRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUserByUsername(authentication.getName());
         if(user == null) {
             return Result.error(ResultStatus.NOT_FOUND,"用户不存在");
         }
-        if(updateUserRequest.getNickname() != null) {
-            user.setNickname(updateUserRequest.getNickname());
-        }
-        if (updateUserRequest.getAvatar() != null) {
-            user.setAvatar(updateUserRequest.getAvatar());
-        }
-        if (updateUserRequest.getBio() != null) {
-            user.setBio(updateUserRequest.getBio());
-        }
-        if (updateUserRequest.getEmail() != null) {
-            user.setEmail(updateUserRequest.getEmail());
-        }
-        if (updateUserRequest.getPhone() != null) {
-            user.setPhone(updateUserRequest.getPhone());
-        }
-        userService.updateById(user);
-        return Result.success(null);
+        BeanUtils.copyProperties(updateUserRequest,user);
+        boolean updated = userService.updateById(user);
+        return updated ? Result.success("用户信息更新成功") : Result.error(ResultStatus.USE_FAILED);
     }
 
     @PutMapping("/password")
@@ -118,8 +107,8 @@ public class UserController {
             return Result.error(ResultStatus.PARAM_ERROR, "旧密码错误");
         }
         user.setPassword(passwordEncoder.encode(updatePasswordRequest.getNewPassword()));
-        userService.updateById(user);
-        return Result.success(null);
+        boolean updated = userService.updateById(user);
+        return updated ? Result.success(null) : Result.error(ResultStatus.USE_FAILED);
     }
     @DeleteMapping("/currentUser")
     public Result<Void> deleteUser() {
@@ -129,9 +118,6 @@ public class UserController {
             return Result.error(ResultStatus.NOT_FOUND,"用户不存在");
         }
         boolean removed = userService.removeById(user.getId());
-        if(!removed) {
-            return Result.error(ResultStatus.NOT_FOUND);
-        }
-        return Result.success(null);
+        return removed ? Result.success(null) : Result.error(ResultStatus.NOT_FOUND);
     }
 }

@@ -6,4 +6,9 @@ import lombok.Data;
 public class UpdatePasswordRequest {
     private String oldPassword;
     private String newPassword;
+
+    public UpdatePasswordRequest(String oldPassword,String newPassword) {
+        this.oldPassword = oldPassword;
+        this.newPassword = newPassword;
+    }
 }

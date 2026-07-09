@@ -43,8 +43,8 @@ public class FriendController {
         friend.setUserId(user.getId());
         friend.setFriendId(userService.getUserByUsername(friendUsername).getId());
         friend.setStatus(0);
-        friendService.save(friend);
-        return Result.success(null);
+        boolean saved = friendService.save(friend);
+        return saved ? Result.success(null) : Result.error(ResultStatus.USE_FAILED);
     }
 
     //处理好友状态

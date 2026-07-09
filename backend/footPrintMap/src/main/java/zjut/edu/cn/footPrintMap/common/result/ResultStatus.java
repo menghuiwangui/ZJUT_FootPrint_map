@@ -8,7 +8,8 @@ public enum ResultStatus {
     UNAUTHORIZED(401, "未登录或登录已过期"),
     FORBIDDEN(403, "没有权限"),
     NOT_FOUND(404, "资源不存在"),
-    SYSTEM_FOUND(500,"系统内部错误");
+    SYSTEM_FOUND(500,"系统内部错误"),
+    USE_FAILED(503, "服务不可用,使用失败，请稍后重试");
 
     private final int code;
     private final String message;
