@@ -7,60 +7,62 @@ import org.springframework.stereotype.Component;
 import zjut.edu.cn.footPrintMap.entity.User;
 
 import javax.crypto.SecretKey;
-import java.util.Base64;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
 public class JWTUtil {
+
     @Value("${jwt.secret}")
-    private String SECRET;
+    private String secret;
 
     @Value("${jwt.expiration}")
     private long expiration;
 
     private SecretKey getSignKey() {
-        byte[] keyBytes = Base64.getDecoder().decode(SECRET);
-        return Keys.hmacShaKeyFor(keyBytes);
+        // ✅ 不要用 Base64.decode
+        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
     public String createToken(User user) {
         Date now = new Date();
-        Date expDate = new Date(now.getTime()+expiration);
+        Date exp = new Date(now.getTime() + expiration);
+
         return Jwts.builder()
-                .setSubject(user.getId())
-                .claim("username",user.getUsername())
-                .setIssuedAt(now)
-                .setExpiration(expDate)
-                .signWith(getSignKey())
+                .subject(user.getId())
+                .claim("username", user.getUsername())
+                .issuedAt(now)
+                .expiration(exp)
+                .signWith(getSignKey(), Jwts.SIG.HS256)
                 .compact();
     }
 
     public String getUserId(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSignKey())
+        return Jwts.parser()
+                .verifyWith(getSignKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody()
+                .parseSignedClaims(token)
+                .getPayload()
                 .getSubject();
     }
 
     public String getUsername(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSignKey())
+        return Jwts.parser()
+                .verifyWith(getSignKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody()
+                .parseSignedClaims(token)
+                .getPayload()
                 .get("username", String.class);
     }
 
     public boolean verifyToken(String token) {
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(getSignKey())
+            Jwts.parser()
+                    .verifyWith(getSignKey())
                     .build()
-                    .parseClaimsJws(token);
+                    .parseSignedClaims(token);
             return true;
-        } catch(Exception e) {
+        } catch (Exception e) {
             return false;
         }
     }
