@@ -67,7 +67,6 @@ public class UserController {
         User user = new User();
         user.setUsername(registerRequest.getUsername());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-        user.setPassword(registerRequest.getPassword());
         user.setNickname(registerRequest.getNickname());
         boolean saved = userService.save(user);
         return saved ? Result.success(null) : Result.error(ResultStatus.USE_FAILED);
