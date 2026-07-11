@@ -64,52 +64,31 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue';
+import { getPostApi, likePostApi, submitCommentApi } from '../api/community';
 
-// 模拟从后端获取的社区数据
-const posts = ref([
-  {
-    id: 1,
-    author: '背包客老李',
-    avatar: '🧔',
-    tags: ['西藏', '拉萨', '布达拉宫'],
-    note: '终于来到了离天空最近的地方，心灵得到了净化！',
-    photos: [],
-    likes: 128,
-    isLiked: false,
-    showComment: false,
-    newComment: '',
-    comments: [
-      { user: '旅行者A', text: '太羡慕了！我明年也要去！' },
-      { user: '摄影爱好者', text: '这光线绝了，带了什么镜头？' }
-    ]
-  },
-  {
-    id: 2,
-    author: '吃货小王',
-    avatar: '👧',
-    tags: ['成都', '美食', '火锅'],
-    note: '成都的火锅真的是吃一次爱一次，微辣已经是我的极限了！',
-    photos: [],
-    likes: 56,
-    isLiked: true,
-    showComment: true,
-    newComment: '',
-    comments: [
-      { user: '重庆网友', text: '来重庆试试老火锅，绝对更巴适！' }
-    ]
-  }
-])
+const posts = ref([]);
 
-// 点赞/取消点赞
-function toggleLike(post) {
-  post.isLiked = !post.isLiked
-  if (post.isLiked) {
-    post.likes++
-  } else {
-    post.likes--
+onMounted(async () => {
+  try {
+    const res = await getPostApi();
+    // 这里是后端需要返回的数据
+    //if (res.code === 200) 
+  } catch (error){
+    console.error('获取帖子失败: ' + error.message);
   }
-  // TODO: 未来这里需要调用后端 API 同步点赞数到数据库
+})
+
+async function toggleLike(post){
+  try {
+    const res = await likePostApi(post.id);
+    if (res.code === 200){
+      post.isLiked = res.data.isLiked;
+      post.likes = res.data.likes;
+    }
+  } catch (error) {
+    console.error('点赞失败: ' + error.message);
+  }
 }
 
 // 显示/隐藏评论
@@ -118,15 +97,27 @@ function toggleComment(post) {
 }
 
 // 提交评论
-function submitComment(post) {
-  if (post.newComment.trim() === '') return
-  
-  post.comments.push({
-    user: '我', // 当前登录用户
-    text: post.newComment
-  })
-  post.newComment = ''
-  // TODO: 未来这里需要调用后端 API 把评论存到数据库
+async function submitComment(post) {
+  if (post.newComment.trim() === '') return;
+
+  const commentText = post.newComment;
+
+  try {
+    const res = await submitCommentApi({
+      postId: post.id,
+      comment: post.newComment
+    })
+    if (res.code !== 200) return;
+
+    post.comments.push({
+      user: '我',
+      text: commentText
+    })
+
+    post.newComment = '' 
+  } catch (error) {
+    console.error('提交评论失败: ' + error.message)
+  }
 }
 </script>
 
