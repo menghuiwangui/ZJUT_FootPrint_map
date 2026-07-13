@@ -32,6 +32,7 @@ public class TravelController {
     //添加游记
     @PostMapping("/addTravel")
     public Result<AddTravelResponse> addTravel(@RequestBody AddTravelRequest addTravelRequest) {
+        System.out.println(1);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if(authentication == null) {
             return Result.error(ResultStatus.UNAUTHORIZED);

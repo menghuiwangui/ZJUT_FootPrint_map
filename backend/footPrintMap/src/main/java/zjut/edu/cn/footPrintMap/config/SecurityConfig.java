@@ -40,6 +40,7 @@ public class SecurityConfig {
                 //禁用Session、CSRF
                 s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                     .csrf(csrf -> csrf.disable())
+                    .cors(cros -> {})
                 //放行登录注册接口，其余需鉴权
                     .authorizeHttpRequests(
                             auth -> auth.requestMatchers(
