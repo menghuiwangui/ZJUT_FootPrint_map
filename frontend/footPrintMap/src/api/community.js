@@ -1,32 +1,66 @@
 import request from '../utils/request';
 
-export function getPostsApi(){
-    return request({
-        url: '/travel/',
-        method: 'post'
-    })
-}
-
+// 创建游记
 export function createPostApi(data){
     return request({
-        url: '/travel/addtravel',
+        url: '/travel/addTravel',
         method: 'post',
         data: data
     })
 }
 
-// 点赞帖子(对应后端 POST /api/posts/:id/like)
-export function likePostApi(postId){
+export function getPostApi(postId){
     return request({
-        url: `/posts/${postId}/like`,
-        method: 'post'
+        url: '/travel/getTravel',
+        method: 'get',
+        params: {
+            travelId: postId
+        }
     })
 }
 
-export function submitCommentApi(data){
+// 点赞帖子,更新点赞数使用这个接口
+export function likePostApi(data){
     return request({
-        url: '/comments',
-        method: 'post',
+        url: '/travel/updateTravel',
+        method: 'put',
         data: data
+    })
+}
+
+export function getPostListApi(){
+    return request({
+        url: '/travel/travelList',
+        method: 'get',
+    })
+}
+
+export function pagePostApi(params){
+    return request({
+        url: '/travel/page',
+        method: 'get',
+        params: {
+            current: params.current || 1,
+            size: params.size || 10,
+            locationId: params.locationId
+        }
+    })
+}
+
+export function updatePostApi(data){
+    return request({
+        url: '/travel/updateTravel',
+        method: 'put',
+        data: data
+    })
+}
+
+export function deletePostApi(postId){
+    return request({
+        url: '/travel/deleteTravel',
+        method: 'delete',
+        params: {
+            travelId: postId
+        }
     })
 }

@@ -10,22 +10,31 @@
 
     <!-- 帖子列表 -->
     <div class="post-list">
+      <!-- 如果没有帖子，显示占位提示 -->
+      <div v-if="posts.length === 0" style="text-align: center; color: #888; padding: 40px;">
+        社区还没有动态，快来发布第一条足迹吧！
+      </div>
+
       <div v-for="post in posts" :key="post.id" class="post-card">
         <!-- 作者信息 -->
         <div class="post-header">
-          <span class="avatar">{{ post.avatar }}</span>
+          <span class="avatar">👤</span>
           <div class="author-info">
-            <div class="author-name">{{ post.author }}</div>
+            <!-- 暂时显示用户ID，后续可改为用户昵称 -->
+            <div class="author-name">用户: {{ post.userId }}</div>
             <div class="post-tags">
-              <span v-for="tag in post.tags" :key="tag" class="tag">#{{ tag }}</span>
+              <span class="tag">#足迹{{ post.locationId }}</span>
+              <span class="tag">#{{ post.visitTime }}</span>
             </div>
           </div>
         </div>
 
         <!-- 帖子内容 -->
         <p class="post-text">{{ post.note }}</p>
-        <div v-if="post.photos.length > 0" class="post-photos">
-          <img v-for="(photo, index) in post.photos" :key="index" :src="photo" class="post-photo" />
+        
+        <!-- 假设后端 photos 是逗号分隔的字符串，或者为空 -->
+        <div v-if="post.photos" class="post-photos">
+          <img :src="post.photos" class="post-photo" />
         </div>
 
         <!-- 互动区域：点赞和评论 -->
@@ -35,7 +44,7 @@
             :class="{ liked: post.isLiked }"
             @click="toggleLike(post)"
           >
-            👍 {{ post.likes }}
+            👍 {{ post.likeCount }}
           </button>
           <button class="action-btn" @click="toggleComment(post)">
             💬 {{ post.comments.length }}
@@ -65,26 +74,55 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { getPostApi, likePostApi, submitCommentApi } from '../api/community';
+import { pagePostApi, updatePostApi } from '../api/community'; 
 
 const posts = ref([]);
 
+// 获取社区帖子列表
 onMounted(async () => {
+  await fetchPosts();
+})
+
+async function fetchPosts() {
   try {
-    const res = await getPostApi();
-    // 这里是后端需要返回的数据
-    //if (res.code === 200) 
+    // 调用分页查询接口
+    const res = await pagePostApi({ current: 1, size: 10 });
+    if (res.code === 200) {
+      posts.value = res.data.records.map(item => ({
+        id: item.id,
+        userId: item.userId,
+        locationId: item.locationId || '未知',
+        visitTime: item.visitTime || '',
+        note: item.note || '该用户没有留下文字...',
+        photos: item.photos || '', 
+        likeCount: item.likeCount || 0, // 注意：后端 Travel 实体需要加这个字段
+        isLiked: false,                 // 前端默认未点赞
+        showComment: false,
+        comments: [],                   // 前端暂存评论
+        newComment: ''
+      }));
+    }
   } catch (error){
     console.error('获取帖子失败: ' + error.message);
   }
-})
+}
 
-async function toggleLike(post){
+// 点赞功能
+async function toggleLike(post) {
+  // 如果已经点赞了，则取消点赞，否则点赞数+1
+  const newLikeCount = post.isLiked ? post.likeCount - 1 : post.likeCount + 1;
+  
   try {
-    const res = await likePostApi(post.id);
-    if (res.code === 200){
-      post.isLiked = res.data.isLiked;
-      post.likes = res.data.likes;
+    // 复用 updateTravel 接口
+    // 发送给后端的是游记ID 和 更新后的点赞数
+    const res = await updatePostApi({
+      travelId: post.id,
+      likeCount: newLikeCount
+    });
+    
+    if (res.code === 200) {
+      post.isLiked = !post.isLiked;
+      post.likeCount = newLikeCount;
     }
   } catch (error) {
     console.error('点赞失败: ' + error.message);
@@ -102,24 +140,29 @@ async function submitComment(post) {
 
   const commentText = post.newComment;
 
+  // 后端暂时没有评论接口，这里只做前端模拟展示
+  post.comments.push({
+    user: '我',
+    text: commentText
+  })
+  post.newComment = ''; 
+  alert('评论成功（注：后端暂未实现评论保存接口，刷新后评论会消失）');
+  
+  /* 
+  // 当你后端写好了评论接口后，使用下面这段代码：
   try {
-    const res = await submitCommentApi({
-      postId: post.id,
-      comment: post.newComment
-    })
-    if (res.code !== 200) return;
-
-    post.comments.push({
-      user: '我',
-      text: commentText
-    })
-
-    post.newComment = '' 
+    const res = await submitCommentApi({ postId: post.id, comment: commentText })
+    if (res.code === 200) {
+      post.comments.push({ user: '我', text: commentText })
+      post.newComment = '' 
+    }
   } catch (error) {
     console.error('提交评论失败: ' + error.message)
   }
+  */
 }
 </script>
+
 
 <style scoped>
 .community-container {

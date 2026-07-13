@@ -17,7 +17,7 @@ export function logoutApi(){
 
 export function registerApi(data){
     return request({
-        url: '/user/rgister',
+        url: '/user/register',
         method: 'post',
         data: data
     })
@@ -51,8 +51,8 @@ export function deletePersonalInfoApi(){
 //修改密码
 export function updatePasswordApi(data){
     return request({
-        url: '/user/password'
-        method: 'put'
+        url: '/user/password',
+        method: 'put',
         data: data
     })
 }

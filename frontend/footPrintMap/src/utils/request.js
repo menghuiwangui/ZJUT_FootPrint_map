@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const instance = axios.create({
-    baseURL: '/api'
-    timeout: 5000,
+    baseURL: '/api',
+    timeout: 5000
 })
 
 
@@ -30,7 +30,7 @@ instance.interceptors.response.use(
         if (error.response && error.response.status === 401){
             alert('登录过期, 请重新登录');
             localStorage.removeItem('token');
-            window.Location.href = '/login';
+            window.location.href = '/login';
         }
         return Promise.reject(error);
     } 

@@ -93,6 +93,12 @@ const authView = ref('login'); // 默认显示登录页
 function handleLoginSuccess() {
   isLoggedIn.value = true;
 }
+
+function handleLogout(){
+  localStorage.removeItem('token')
+  isLoggedIn.value = false;
+  authView.value = 'login';
+}
 </script>
 
 <style>
