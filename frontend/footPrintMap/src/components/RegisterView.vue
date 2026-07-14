@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { registerApi } from '../api/user';
 
-const formdata = ref({
+const formData = ref({
     username: '',
     password: '',
     nickname: ''
@@ -11,23 +11,21 @@ const formdata = ref({
 const emit = defineEmits(['back-login', 'register-success'])
 
 async function handleRegister(){
-    if (!formdata.value.username || !formdata.value.password || !formdata.value.nickname) {
+    if (!formData.value.username || !formData.value.password || !formData.value.nickname) {
         alert('请填写完整信息');
         return;
     }
 
     try {
-        const res = await registerApi(formdata.value);
+        const res = await registerApi(formData.value);
         if (res.code === 200){
             alert('注册成功！');
             emit('register-success');
         }else{
             alert('注册失败，用户名已存在: ' + res.message);
         }
-        window.location.herf = '/login';
     }catch (error){
         console.error('注册失败: ' + error.message);
-        window.location.herf = '/login';
     }
 }
 </script>

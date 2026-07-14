@@ -9,7 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import tools.jackson.databind.util.BeanUtil;
+//import tools.jackson.databind.util.BeanUtil;
 import zjut.edu.cn.footPrintMap.common.result.Result;
 import zjut.edu.cn.footPrintMap.common.result.ResultStatus;
 import zjut.edu.cn.footPrintMap.common.utils.JWTUtil;
@@ -39,6 +39,16 @@ public class UserController {
 
     @PostMapping("/login")
     public Result<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+
+//        User mockUser = new User();
+//        mockUser.setId("1");
+//        mockUser.setUsername(loginRequest.getUsername());
+//        mockUser.setRole(0);
+//
+//        String token = jwtUtil.createToken(mockUser);
+//        LoginResponse response = new LoginResponse(token, mockUser.getUsername(), mockUser.getRole());
+//        return Result.success(response);
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getUsername(),
@@ -59,6 +69,8 @@ public class UserController {
 
     @PostMapping("/register")
     public Result<Void> register(@RequestBody RegisterRequest registerRequest) {
+
+//        return Result.success(null);
         boolean exists = userService.lambdaQuery()
                 .eq(User::getUsername,registerRequest.getUsername()).exists();
         if(exists) {

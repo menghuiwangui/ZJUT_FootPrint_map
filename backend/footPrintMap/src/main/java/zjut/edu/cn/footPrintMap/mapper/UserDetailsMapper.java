@@ -28,7 +28,7 @@ public class UserDetailsMapper implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        String roleName = (role != null && role == 1) ? "AMDIN": "USER";
+        String roleName = (role != null && role == 1) ? "ADMIN": "USER";
         return List.of(new SimpleGrantedAuthority("ROLE_" + roleName));
     }
 

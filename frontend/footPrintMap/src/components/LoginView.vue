@@ -39,7 +39,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import { login } from '../api/user';
+import { loginApi } from '../api/user';
 
 const username = ref('');
 const password = ref('');
@@ -54,7 +54,7 @@ async function handleLogin() {
   }
 
   try{
-    const res = await login({
+    const res = await loginApi({
       username: username.value,
       password: password.value
     })

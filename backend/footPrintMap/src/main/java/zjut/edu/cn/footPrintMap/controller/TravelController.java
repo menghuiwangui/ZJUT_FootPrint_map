@@ -34,22 +34,22 @@ public class TravelController {
     public Result<AddTravelResponse> addTravel(@RequestBody AddTravelRequest addTravelRequest) {
         System.out.println(1);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if(authentication == null) {
+        if (authentication == null) {
             return Result.error(ResultStatus.UNAUTHORIZED);
         }
         User user = userService.getUserByUsername(authentication.getName());
         Travel travel = new Travel();
         travel.setUserId(user.getId());
-        BeanUtils.copyProperties(addTravelRequest,travel);
+        BeanUtils.copyProperties(addTravelRequest, travel);
         boolean saved = travelService.save(travel);
         return saved ? Result.success(new AddTravelResponse(travel.getId())) : Result.error(ResultStatus.USE_FAILED);
     }
 
     //获取游记详情
     @GetMapping("/getTravel")
-    public Result<Travel> getTravel(@RequestParam String travelId){
+    public Result<Travel> getTravel(@RequestParam String travelId) {
         Travel travel = travelService.getById(travelId);
-        if(travel == null) {
+        if (travel == null) {
             return Result.error(ResultStatus.NOT_FOUND);
         }
         return Result.success(travel);
@@ -59,12 +59,12 @@ public class TravelController {
     @GetMapping("/travelList")
     public Result<List<Travel>> getTravelListByUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if(authentication == null) {
+        if (authentication == null) {
             return Result.error(ResultStatus.UNAUTHORIZED);
         }
         User user = userService.getUserByUsername(authentication.getName());
         return Result.success(travelService.list(new LambdaQueryWrapper<Travel>()
-                .eq(Travel::getUserId,user.getId())
+                .eq(Travel::getUserId, user.getId())
                 .orderByDesc(Travel::getVisitTime)));
     }
 
@@ -74,11 +74,11 @@ public class TravelController {
                                             @RequestParam(defaultValue = "10") Integer size,
                                             @RequestParam(required = false) String locationId) {
         LambdaQueryWrapper<Travel> wrapper = new LambdaQueryWrapper<>();
-        if(locationId != null) {
-            wrapper.eq(Travel::getLocationId,locationId);
+        if (locationId != null) {
+            wrapper.eq(Travel::getLocationId, locationId);
         }
         wrapper.orderByDesc(Travel::getVisitTime);
-        Page<Travel> page = travelService.page(new Page<>(current,size),wrapper);
+        Page<Travel> page = travelService.page(new Page<>(current, size), wrapper);
         return Result.success(page);
     }
 
@@ -86,18 +86,19 @@ public class TravelController {
     @PutMapping("/updateTravel")
     public Result<Void> updateTravel(@RequestBody UpdateTravelRequest updateTravelRequest) {
         Travel travel = travelService.getById(updateTravelRequest.getTravelId());
-        if(travel == null) {
+        if (travel == null) {
             return Result.error(ResultStatus.NOT_FOUND);
         }
-        BeanUtils.copyProperties(updateTravelRequest,travel);
+        BeanUtils.copyProperties(updateTravelRequest, travel);
         boolean updated = travelService.updateById(travel);
         return updated ? Result.success(null) : Result.error(ResultStatus.USE_FAILED);
     }
 
     //删除游记
-    @DeleteMapping("deleteTravel")
+    @DeleteMapping("/deleteTravel")
     public Result<Void> deleteTravel(@RequestParam String travelId) {
         boolean removed = travelService.removeById(travelId);
-        return removed ? Result.success(null):Result.error(ResultStatus.USE_FAILED);
+        return removed ? Result.success(null) : Result.error(ResultStatus.USE_FAILED);
     }
+
 }
