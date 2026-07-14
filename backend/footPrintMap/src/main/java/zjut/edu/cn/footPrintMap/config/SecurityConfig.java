@@ -3,11 +3,13 @@ package zjut.edu.cn.footPrintMap.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +23,9 @@ import zjut.edu.cn.footPrintMap.filter.JwtAuthenticationFilter;
 public class SecurityConfig {
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Autowired
+    private CorsConfig corsConfig;
 
     //密码编码器
     @Bean
@@ -39,10 +44,13 @@ public class SecurityConfig {
         httpSecurity.sessionManagement(
                 //禁用Session、CSRF
                 s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                    .csrf(csrf -> csrf.disable())
+                    .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
+                    .csrf(AbstractHttpConfigurer::disable)
                 //放行登录注册接口，其余需鉴权
                     .authorizeHttpRequests(
-                            auth -> auth.requestMatchers(
+                            auth -> auth.requestMatchers(HttpMethod.OPTIONS, "/**")
+                                    .permitAll()
+                                    .requestMatchers(
                                     "/api/user/login",
                                             "/api/user/register",
                                             //http://localhost:8080/swagger-ui/index.html

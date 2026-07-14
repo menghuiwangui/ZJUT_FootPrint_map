@@ -32,7 +32,6 @@ public class TravelController {
     //添加游记
     @PostMapping("/addTravel")
     public Result<AddTravelResponse> addTravel(@RequestBody AddTravelRequest addTravelRequest) {
-        System.out.println(1);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null) {
             return Result.error(ResultStatus.UNAUTHORIZED);
@@ -73,7 +72,13 @@ public class TravelController {
     public Result<IPage<Travel>> pageTravel(@RequestParam(defaultValue = "1") Integer current,
                                             @RequestParam(defaultValue = "10") Integer size,
                                             @RequestParam(required = false) String locationId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            return Result.error(ResultStatus.UNAUTHORIZED);
+        }
+        User user = userService.getUserByUsername(authentication.getName());
         LambdaQueryWrapper<Travel> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Travel::getUserId,user.getId());
         if (locationId != null) {
             wrapper.eq(Travel::getLocationId, locationId);
         }
