@@ -58,17 +58,23 @@ async function handleLogin() {
       username: username.value,
       password: password.value
     })
-    if (res.token){
+    if (res.code === 200){
       localStorage.setItem('token', res.data.token);
-      localStorage.setItem('username', res.username);
+      localStorage.setItem('username', res.data.username);
       emit('login-success');
     }
     else{
       alert(res.message || '登录失败，请检查用户名和密码')
     }
   }catch(error){
-    console.error('登录请求失败: ' + error.message);
-    alert('网络异常，请稍后再试');
+    console.error('登录请求失败: ', error);
+    // 如果 error 里有 message，说明是后端返回的业务错误（如密码错误）
+    if (error.message) {
+        alert(error.message); 
+    } else {
+        // 否则才是真正的网络断开等异常
+        alert('网络异常，请稍后再试');
+    }
   }
 }
 

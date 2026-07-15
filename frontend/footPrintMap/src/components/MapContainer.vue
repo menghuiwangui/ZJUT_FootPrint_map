@@ -101,16 +101,8 @@ const formData = ref({
 const { footprints, addFootPrint: addFootprintData } = useFootPrints();  // 足迹数据管理
 const { fileInput, triggerFileInput, handlePhotoUpload, removePhoto } = usePhotoUpload(formData); // 照片上传逻辑
 
-function drawLightedCities(cityName) {
+function drawCityBoundary(cityName){
   console.log('开始点亮城市',cityName);
-
-  if (!cityName || lightedCities.value.includes(cityName)){
-    console.log('城市已点亮或为空',cityName);
-    return;
-  }
-
-  lightedCities.value.push(cityName);
-  localStorage.setItem('lighted_cities', JSON.stringify(lightedCities.value));
 
   if (!districtSearch){
     console.log('districtSearch 未初始化');
@@ -151,6 +143,25 @@ function drawLightedCities(cityName) {
       console.error('区划查询失败:', status, result);
     }
   });
+}
+
+function drawLightedCities(cityName) {
+  console.log('开始点亮城市',cityName);
+
+  if (!cityName || lightedCities.value.includes(cityName)){
+    console.log('城市已点亮或为空',cityName);
+    return;
+  }
+
+  lightedCities.value.push(cityName);
+  localStorage.setItem('lighted_cities', JSON.stringify(lightedCities.value));
+
+  if (!districtSearch){
+    console.log('districtSearch 未初始化');
+    return;
+  }
+
+  drawCityBoundary(cityName);
 }
 
 function handleSaveFootprint(){

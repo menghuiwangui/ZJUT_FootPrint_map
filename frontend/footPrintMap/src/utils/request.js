@@ -32,6 +32,12 @@ instance.interceptors.response.use(
             localStorage.removeItem('token');
             window.location.href = '/login';
         }
+
+        if (error.response && error.response.data) {
+            // 直接把后端返回的 {code, message, data} 对象抛给前端的 catch
+            return Promise.reject(error.response.data); 
+        }
+        
         return Promise.reject(error);
     } 
 )

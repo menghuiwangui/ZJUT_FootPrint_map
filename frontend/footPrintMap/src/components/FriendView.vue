@@ -6,10 +6,11 @@
     const friendList = ref([])
     const friendRequest = ref({
         friendUserName: '',
-        status: '' // 1：同意 2：拒绝 3：删除
+        status: ''  // 1：同意 2：拒绝 3：删除
     })
 
     async function handleFriendRequest(){
-
+        const res = await handleFriendRequestApi(friendRequest)
+        
     }
 </script>
