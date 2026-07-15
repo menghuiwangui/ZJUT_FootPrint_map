@@ -34,7 +34,7 @@ export function getPersonalInfoApi(){
 //个人信息修改
 export function updatePersonalInfoApi(data){
     return request({
-        url: 'user/currentUser',
+        url: '/user/currentUser',
         method: 'put',
         data: data
     })
@@ -43,7 +43,7 @@ export function updatePersonalInfoApi(data){
 //个人信息删除
 export function deletePersonalInfoApi(){
     return request({
-        url: 'user/currentUser',
+        url: '/user/currentUser',
         method: 'delete',
     })
 }

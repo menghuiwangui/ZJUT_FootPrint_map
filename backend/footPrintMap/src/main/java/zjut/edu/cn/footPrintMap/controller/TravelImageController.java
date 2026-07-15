@@ -55,7 +55,7 @@ public class TravelImageController {
     }
 
     //获取某游记的图片列表
-    @GetMapping("travelImageList")
+    @GetMapping("/travelImageList")
     public Result<List<TravelImage>> getTravelImageList(@RequestParam String travelId) {
         Travel travel = travelService.getById(travelId);
         if (travel == null) {
