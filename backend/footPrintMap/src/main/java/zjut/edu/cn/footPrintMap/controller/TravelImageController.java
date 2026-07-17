@@ -44,13 +44,19 @@ public class TravelImageController {
         if(!travel.getUserId().equals(user.getId())) {
             return Result.error(ResultStatus.FORBIDDEN, "无权操作该游记");
         }
+        List<TravelImage> images = travelImageService.list(
+                new LambdaQueryWrapper<TravelImage>()
+                        .eq(TravelImage::getTravelId,travel.getId())
+        );
+        for(TravelImage image:images){
+            image.setSortOrder(image.getSortOrder()+1);
+        }
         TravelImage travelImage = new TravelImage();
         BeanUtils.copyProperties(uploadTravelImageRequest,travelImage);
-        //更新其他图片的排序顺序
-        //？？？
-
-
         boolean saved = travelImageService.save(travelImage);
+        if(saved){
+            travelImageService.updateBatchById(images);
+        }
         return saved ? Result.success(travelImage.getId()):Result.error(ResultStatus.USE_FAILED);
     }
 
@@ -94,8 +100,17 @@ public class TravelImageController {
             return Result.error(ResultStatus.FORBIDDEN, "无权删除该图片");
         }
         boolean removed = travelImageService.removeById(travelImageId);
-        //改变图片排序顺序
-
+        if(removed){
+            List<TravelImage> images = travelImageService.list(
+                    new LambdaQueryWrapper<TravelImage>()
+                            .eq(TravelImage::getTravelId,travel.getId())
+                            .gt(TravelImage::getSortOrder,travelImage.getSortOrder())
+                            .orderByAsc(TravelImage::getSortOrder)
+            );
+            for(TravelImage image:images){
+                image.setSortOrder(image.getSortOrder()-1);
+            }
+        }
         return removed ? Result.success(null) : Result.error(ResultStatus.USE_FAILED);
     }
 }
