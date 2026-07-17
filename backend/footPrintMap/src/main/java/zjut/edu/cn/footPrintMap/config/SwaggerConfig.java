@@ -1,4 +1,4 @@
-package zjut.edu.cn.FootPrintMap.config;//package zjut.edu.cn.footPrintMap.config;
+package zjut.edu.cn.footPrintMap.config;//package zjut.edu.cn.footPrintMap.config;
 //
 //import org.springframework.context.annotation.Bean;
 //import org.springframework.context.annotation.Configuration;
