@@ -67,6 +67,12 @@ public class UserController {
         return Result.error(ResultStatus.PARAM_ERROR);
     }
 
+    // 退出登录（JWT 无状态，客户端删除 token 即可）
+    @PostMapping("/logout")
+    public Result<Void> logout() {
+        return Result.success(null);
+    }
+
     @PostMapping("/register")
     public Result<Void> register(@RequestBody RegisterRequest registerRequest) {
 

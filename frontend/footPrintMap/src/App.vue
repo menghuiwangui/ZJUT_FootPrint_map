@@ -40,10 +40,13 @@
       </div>
     </aside>
 
-    <!-- 2. 右上角个人中心 -->
+    <!-- 2. 右上角个人中心 + 退出登录 -->
     <div class="top-right-menu">
       <button class="profile-btn" @click="currentView = 'profile'">
         👤 个人中心
+      </button>
+      <button class="logout-btn" @click="handleLogout">
+        🚪 退出登录
       </button>
     </div>
 
@@ -55,15 +58,10 @@
       <!-- 社区页 -->
       <CommunityView v-else-if="currentView === 'community'" />
       
-      <!-- 好友页 (暂时用占位符，你可以替换为 <FriendsView />) -->
       <FriendsView v-else-if="currentView === 'friends'" />
 
-      <!-- 个人中心页 (暂时用占位符，你可以替换为 <ProfileView />) -->
-      <div v-else-if="currentView === 'profile'" class="placeholder-view">
-        <h2>个人中心</h2>
-        <p>此处可以放置修改密码、修改个人信息等组件...</p>
-        <button @click="currentView = 'map'" style="margin-top: 20px; padding: 5px 10px; cursor: pointer;">返回地图</button>
-      </div>
+      <!-- 个人中心页 -->
+      <PensonalCenter v-else-if="currentView === 'profile'" />
     </main>
 
   </div>
@@ -77,7 +75,8 @@ import UpdatePasswordView from './components/UpdatePasswordView.vue';
 import MapContainer from './components/MapContainer.vue';
 import CommunityView from './components/CommunityView.vue';
 import FriendsView from './components/FriendView.vue';
-// import ProfileView from './components/ProfileView.vue';
+import PensonalCenter from './components/PensonalCenter.vue';
+import { logoutApi } from './api/user';
 
 // 初始化时检查本地是否有 Token
 const isLoggedIn = ref(localStorage.getItem('token') !== null);
@@ -90,10 +89,19 @@ function handleLoginSuccess() {
   isLoggedIn.value = true;
 }
 
-function handleLogout(){
-  localStorage.removeItem('token')
+async function handleLogout(){
+  try {
+    await logoutApi();
+  } catch (e) {
+    // 即使后端报错也继续清除本地状态
+  }
+  localStorage.removeItem('token');
+  localStorage.removeItem('username');
+  localStorage.removeItem('userId');
+  localStorage.removeItem('avatar');
   isLoggedIn.value = false;
   authView.value = 'login';
+  currentView.value = 'map';
 }
 </script>
 
@@ -192,12 +200,31 @@ body, html {
   color: #333;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   transition: all 0.3s;
+  margin-right: 8px;
 }
 
 .profile-btn:hover {
   background: #FF8C00;
   color: white;
   border-color: #FF8C00;
+}
+
+.logout-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 8px 15px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: all 0.3s;
+}
+
+.logout-btn:hover {
+  background: #ff4d4f;
+  color: white;
+  border-color: #ff4d4f;
 }
 
 /* --- 3. 主内容区域样式 --- */
