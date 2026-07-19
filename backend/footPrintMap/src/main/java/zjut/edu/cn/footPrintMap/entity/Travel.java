@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class Travel {
     @TableField(value = "tags", typeHandler = JacksonTypeHandler.class)
     private List<String> tags;
 
-    private LocalDateTime visitTime;
+    private LocalDate visitTime;
     private Integer visibility;     // 0-公开  1-仅自己  2-仅好友
     private Integer likesCount;
     private LocalDateTime createdTime;

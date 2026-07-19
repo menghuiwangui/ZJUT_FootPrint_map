@@ -70,7 +70,6 @@ public class UserController {
     @PostMapping("/register")
     public Result<Void> register(@RequestBody RegisterRequest registerRequest) {
 
-//        return Result.success(null);
         boolean exists = userService.lambdaQuery()
                 .eq(User::getUsername,registerRequest.getUsername()).exists();
         if(exists) {

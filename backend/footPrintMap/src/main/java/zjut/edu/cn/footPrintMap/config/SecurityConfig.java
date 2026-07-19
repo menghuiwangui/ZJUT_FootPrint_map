@@ -63,4 +63,24 @@ public class SecurityConfig {
                     .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
+
+//    @Bean
+//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//        http
+//                // 1. 显式关闭 CSRF，这是解决 403 的核心
+//                .csrf(csrf -> csrf.disable())
+//
+//                // 2. 显式放行登录接口，不要用 permitAll() 的默认行为
+//                .authorizeHttpRequests(auth -> auth
+//                        .requestMatchers("/api/user/login").permitAll() // 放行登录
+//                        .requestMatchers("/**").permitAll()             // 开发阶段甚至可以放行所有
+//                        .anyRequest().authenticated()
+//                )
+//
+//                // 3. 禁用 Session 验证 (可选，但推荐在前后端分离项目加上)
+//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+//
+//        return http.build();
+//    }
+
 }

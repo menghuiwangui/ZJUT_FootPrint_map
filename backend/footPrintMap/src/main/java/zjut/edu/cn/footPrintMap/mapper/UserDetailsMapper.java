@@ -19,6 +19,7 @@ public class UserDetailsMapper implements UserDetails {
     private Integer role;  // 0-普通用户，1-管理员
 
     public static UserDetailsMapper build(User user) {
+        System.out.println(user.getPassword());
         return new UserDetailsMapper(
                 user.getId(),
                 user.getUsername(),

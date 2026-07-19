@@ -16,11 +16,13 @@ public class FriendServiceImpl extends ServiceImpl<FriendMapper, Friend> impleme
     private UserService userService;
 
     @Override
-    public boolean exists(String userName,String friendName) {
+    public boolean exists(String userName, String friendName) {
         String userId = userService.getUserByUsername(userName).getId();
         String friendUserId = userService.getUserByUsername(friendName).getId();
+        // 双向检查：A→B 或 B→A 任一存在即算已存在
         return exists(new LambdaQueryWrapper<Friend>()
-                .eq(Friend::getUserId,userId)
-                .eq(Friend::getFriendId,friendUserId));
+                .and(w -> w
+                        .and(w1 -> w1.eq(Friend::getUserId, userId).eq(Friend::getFriendId, friendUserId))
+                        .or(w2 -> w2.eq(Friend::getUserId, friendUserId).eq(Friend::getFriendId, userId))));
     }
 }

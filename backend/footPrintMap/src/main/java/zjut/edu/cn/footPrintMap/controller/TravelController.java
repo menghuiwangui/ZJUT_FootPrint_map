@@ -67,6 +67,16 @@ public class TravelController {
                 .orderByDesc(Travel::getVisitTime)));
     }
 
+    //按 userId 获取指定用户的游记（只返回公开的）
+    @GetMapping("/userPosts")
+    public Result<List<Travel>> getPostsByUserId(@RequestParam String userId) {
+        List<Travel> list = travelService.list(new LambdaQueryWrapper<Travel>()
+                .eq(Travel::getUserId, userId)
+                .eq(Travel::getVisibility, 0) // 只返回公开游记
+                .orderByDesc(Travel::getVisitTime));
+        return Result.success(list);
+    }
+
     // 分页查询游记
     @GetMapping("/page")
     public Result<IPage<Travel>> pageTravel(@RequestParam(defaultValue = "1") Integer current,
@@ -90,9 +100,18 @@ public class TravelController {
     //更新游记
     @PutMapping("/updateTravel")
     public Result<Void> updateTravel(@RequestBody UpdateTravelRequest updateTravelRequest) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            return Result.error(ResultStatus.UNAUTHORIZED);
+        }
+        User user = userService.getUserByUsername(authentication.getName());
         Travel travel = travelService.getById(updateTravelRequest.getTravelId());
         if (travel == null) {
             return Result.error(ResultStatus.NOT_FOUND);
+        }
+        // 校验所属权：只能更新自己的游记
+        if (!travel.getUserId().equals(user.getId())) {
+            return Result.error(ResultStatus.UNAUTHORIZED);
         }
         BeanUtils.copyProperties(updateTravelRequest, travel);
         boolean updated = travelService.updateById(travel);
@@ -102,6 +121,19 @@ public class TravelController {
     //删除游记
     @DeleteMapping("/deleteTravel")
     public Result<Void> deleteTravel(@RequestParam String travelId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            return Result.error(ResultStatus.UNAUTHORIZED);
+        }
+        User user = userService.getUserByUsername(authentication.getName());
+        Travel travel = travelService.getById(travelId);
+        if (travel == null) {
+            return Result.error(ResultStatus.NOT_FOUND);
+        }
+        // 校验所属权：只能删除自己的游记
+        if (!travel.getUserId().equals(user.getId())) {
+            return Result.error(ResultStatus.UNAUTHORIZED);
+        }
         boolean removed = travelService.removeById(travelId);
         return removed ? Result.success(null) : Result.error(ResultStatus.USE_FAILED);
     }

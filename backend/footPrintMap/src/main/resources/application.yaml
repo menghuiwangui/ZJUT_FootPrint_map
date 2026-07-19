@@ -1,10 +1,10 @@
 spring:
   application:
-    name: footPrintMap
+    name: footprintmap
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/footprintmap?createDatabaseIfNotExist=true&serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8
     username: root
-    password: 'Q5h8VUxT8))MX>AHky:$'
+    password: '@lxy85566592'
     driver-class-name: com.mysql.cj.jdbc.Driver
   servlet:
     multipart:
@@ -13,7 +13,7 @@ spring:
       max-request-size: 30MB
 
   flyway:
-    enabled: false  # 关闭 Flyway
+    enabled: true  # 关闭 Flyway
     baseline-on-migrate: true  # 已有表也能平滑接入
     locations: classpath:db/migration  # SQL 脚本存放路径
 #  mybatis-plus:

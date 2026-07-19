@@ -56,10 +56,7 @@
       <CommunityView v-else-if="currentView === 'community'" />
       
       <!-- 好友页 (暂时用占位符，你可以替换为 <FriendsView />) -->
-      <div v-else-if="currentView === 'friends'" class="placeholder-view">
-        <h2>好友列表</h2>
-        <p>此处等待接入 FriendsView 组件...</p>
-      </div>
+      <FriendsView v-else-if="currentView === 'friends'" />
 
       <!-- 个人中心页 (暂时用占位符，你可以替换为 <ProfileView />) -->
       <div v-else-if="currentView === 'profile'" class="placeholder-view">
@@ -79,8 +76,7 @@ import RegisterView from './components/RegisterView.vue'
 import UpdatePasswordView from './components/UpdatePasswordView.vue';
 import MapContainer from './components/MapContainer.vue';
 import CommunityView from './components/CommunityView.vue';
-// 当你写好了好友和个人中心组件后，取消下面两行的注释引入即可
-// import FriendsView from './components/FriendsView.vue';
+import FriendsView from './components/FriendView.vue';
 // import ProfileView from './components/ProfileView.vue';
 
 // 初始化时检查本地是否有 Token

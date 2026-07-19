@@ -2,6 +2,7 @@ package zjut.edu.cn.footPrintMap.dto.request.travelRequest;
 
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -11,10 +12,10 @@ public class AddTravelRequest {
     private String title;
     private String content;
     private List<String> tags;
-    private LocalDateTime visitTime;
+    private LocalDate visitTime;
     private Integer visibility; // 0-公开 1-仅自己 2-仅好友
 
-    public AddTravelRequest(String locationId, String title, String content, List<String> tags, LocalDateTime visitTime, Integer visibility) {
+    public AddTravelRequest(String locationId, String title, String content, List<String> tags, LocalDate visitTime, Integer visibility) {
         this.locationId = locationId;
         this.title = title;
         this.content = content;

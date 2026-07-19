@@ -16,6 +16,7 @@ import zjut.edu.cn.footPrintMap.service.LocationService;
 import zjut.edu.cn.footPrintMap.service.UserService;
 
 import java.util.List;
+//import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/location")

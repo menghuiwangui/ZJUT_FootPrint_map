@@ -31,16 +31,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
         //取token
         if(header != null && header.startsWith("Bearer ")) {
-            String user_id = jwtUtil.getUserId(header.substring(7));
-            String username = jwtUtil.getUsername(header.substring(7));
+            String token = header.substring(7);
             //无上下文认证信息时，手动装入认证
-            if(jwtUtil.verifyToken(header.substring(7))) {
-                if(user_id != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    UserDetailsMapper userDetailsMapper = (UserDetailsMapper) userDetailsService.loadUserByUsername(username);
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetailsMapper,null,userDetailsMapper.getAuthorities());
-                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            try {
+                if (jwtUtil.verifyToken(token)) {
+                    String user_id = jwtUtil.getUserId(token);
+                    String username = jwtUtil.getUsername(token);
+                    if (user_id != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                        UserDetailsMapper userDetailsMapper = (UserDetailsMapper) userDetailsService.loadUserByUsername(username);
+                        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetailsMapper, null, userDetailsMapper.getAuthorities());
+                        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                    }
                 }
+            }catch (io.jsonwebtoken.ExpiredJwtException e){
+                System.out.println("Token 已过期，请重新登录");
+            }catch (Exception e){
+                System.out.println("Token 无效: " + e.getMessage());
             }
         }
         try {
